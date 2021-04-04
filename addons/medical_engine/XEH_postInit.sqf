@@ -16,23 +16,23 @@
     // "exitWith", which would be broken with "HandleDamage" otherwise.
     _unit setVariable [
         QEGVAR(medical,HandleDamageEHID),
-        _unit addEventHandler ["HandleDamage", {_this call FUNC(handleDamage)}]            
+        _unit addEventHandler ["HandleDamage", {_this call FUNC(handleDamage)}]
     ];
     _unit setVariable [
         QEGVAR(medical,HitEHID),
-        _unit addEventHandler ["Hit", {_this call FUNC(hit)}]            
+        _unit addEventHandler ["Hit", {_this call FUNC(hit)}]
     ];
 
     _unit setVariable [QEGVAR(medical,HitPoints), _allHitPoints];
 
-    _unit setVariable [QEGVAR(medical,HeadHitPointIdxs), ["hitface", "hitneck", "hithead"]  apply {_allHitPoints find _x} ]; 
-    _unit setVariable [QEGVAR(medical,BodyHitPointIdxs), ["hitchest", "hitdiaphragm", "hitabdomen", "hitpelvis"]  apply {_allHitPoints find _x} ]; 
-    
+    _unit setVariable [QEGVAR(medical,HeadHitPointIdxs), ["hitface", "hitneck", "hithead"]  apply {_allHitPoints find _x} ];
+    _unit setVariable [QEGVAR(medical,BodyHitPointIdxs), ["hitchest", "hitdiaphragm", "hitabdomen", "hitpelvis"]  apply {_allHitPoints find _x} ];
+
     _unit setVariable [QEGVAR(medical,HitPoints), _allHitPoints];
     {
         _unit setVariable [format["%1Idx", _x], _forEachIndex];
 
-    } forEach _allHitPoints;    
+    } forEach _allHitPoints;
 }, nil, [IGNORE_BASE_UAVPILOTS], true] call CBA_fnc_addClassEventHandler;
 
 
@@ -46,6 +46,20 @@
         [_unit, true] call FUNC(setUnconsciousAnim);
     };
 }] call CBA_fnc_addClassEventHandler;
+
+// Guarantee aircraft crashes are more lethal
+["Air", "Killed", {
+    params ["_vehicle", "_killer"];
+    TRACE_3("air killed",_vehicle,typeOf _vehicle,velocity _vehicle);
+    if ((getText (configOf _vehicle >> "destrType")) == "") exitWith {};
+    if (unitIsUAV _vehicle) exitWith {};
+
+    private _lethality = linearConversion [0, 25, (vectorMagnitude velocity _vehicle), 0.5, 1];
+    TRACE_2("air crash",_lethality,crew _vehicle);
+    {
+        [QEGVAR(medical,woundReceived), [_x, "Head", _lethality, _killer, "#vehiclecrash", [HITPOINT_INDEX_HEAD,1]], _x] call CBA_fnc_targetEvent;
+    } forEach (crew _vehicle);
+}, true, ["ParachuteBase"]] call CBA_fnc_addClassEventHandler;
 
 // Fixes units being stuck in unconscious animation when being knocked over by a PhysX object
 ["CAManBase", "AnimDone", {
