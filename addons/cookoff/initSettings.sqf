@@ -11,14 +11,14 @@
 ] call CBA_fnc_addSetting;
 
 [
-    QGVAR(enableAmmobox), "CHECKBOX",
-    [LSTRING(enableBoxCookoff_name), LSTRING(enableBoxCookoff_tooltip)],
+    QGVAR(enableFire), "CHECKBOX",
+    [LSTRING(enableFire_name), LSTRING(enableFire_tooltip)],
     LSTRING(category_displayName),
     true, // default value
     true, // isGlobal
-    {[QGVAR(enableAmmobox), _this] call EFUNC(common,cbaSettings_settingChanged)},
-    true // Needs mission restart
-] call CBA_fnc_addSetting;
+    {[QGVAR(enableFire), _this] call EFUNC(common,cbaSettings_settingChanged)},
+    false // Needs mission restart
+] call CBA_settings_fnc_init;
 
 [
     QGVAR(enableAmmoCookoff), "CHECKBOX",
@@ -27,6 +27,16 @@
     true, // default value
     true, // isGlobal
     {[QGVAR(enableAmmoCookoff), _this] call EFUNC(common,cbaSettings_settingChanged)},
+    false // Needs mission restart
+] call CBA_settings_fnc_init;
+
+[
+    QGVAR(enableAmmobox), "CHECKBOX",
+    [LSTRING(enableBoxCookoff_name), LSTRING(enableBoxCookoff_tooltip)],
+    LSTRING(category_displayName),
+    true, // default value
+    true, // isGlobal
+    {[QGVAR(enableAmmobox), _this] call EFUNC(common,cbaSettings_settingChanged)},
     true // Needs mission restart
 ] call CBA_fnc_addSetting;
 
